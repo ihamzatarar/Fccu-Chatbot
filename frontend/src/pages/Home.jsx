@@ -1,107 +1,129 @@
-import { useState, useEffect } from "react";
-import api from "../api";
+import { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import MainContent from '../components/MainContent';
+import SignIn from '../components/SignIn';
 import Settings from '../components/Settings';
-import "../styles/Home.css";
+import api from "../api.js";
+import '../components/Styles/App.css';
 
-function Home() {
-    const [isSignedIn, setSignedIn] = useState(false);
-    const [backgroundColor, setBackgroundColor] = useState('#ffffff');
-    const [showSettings, setShowSettings] = useState(false);
-    const [refreshKey, setRefreshKey] = useState(0);
-    const [messages, setMessages] = useState([]);
+function App() {
+  const [isSignedIn, setSignedIn] = useState(false);
+  const [backgroundColor, setBackgroundColor] = useState('#ffffff');
+  const [showSettings, setShowSettings] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); // Key for refreshing MainContent
 
-    useEffect(() => {
-        getMessage();
-    }, []);
+  const [sessions, setSessions] = useState([]);
+  const [currentSession, setCurrentSession] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-    const getMessage = () => {
-        api
-            .get("/api/chat/")
-            .then((res) => res.data)
-            .then((data) => {
-                setMessages(data);
-            })
-            .catch((err) => alert(err));
-    };
+  // Functions to interact with backend API
+  const createChatSession = () => api.post('/api/session/');
+  const sendMessage = (sessionId, message) => api.post(`/api/session/${sessionId}/message/`, { message });
+  const deleteChatSession = (sessionId) => api.delete(`/api/session/${sessionId}/`);
+  const listChatSessions = () => api.get('/api/session/');
 
-    const deleteAllChats = () => {
-        api
-            .delete(`/api/chat/delete_all/`)
-            .then((res) => {
-                if (res.status === 204) {
-                    getMessage(); // Refresh messages without alert
-                } else {
-                    alert("Failed to delete chats.");
-                }
-            })
-            .catch((error) => alert(error));
-    };
+  // Fetch sessions on component mount
+  useEffect(() => {
+    fetchSessions();
+  }, []);
 
-    const createMessage = (newMessage) => {
-        api
-            .post("/api/chat/", newMessage)
-            .then((res) => {
-                if (res.status === 201) {
-                    getMessage(); // Refresh messages without alert
-                } else {
-                    alert("Failed to create chat.");
-                }
-            })
-            .catch((err) => alert(err));
-    };
+  // Fetch all chat sessions
+  const fetchSessions = async () => {
+    try {
+      const response = await listChatSessions();
+      setSessions(response.data);
+    } catch (error) {
+      console.error('Error fetching sessions:', error);
+    }
+  };
 
-    const handleSignIn = () => {
-        setSignedIn(true);
-    };
+  // Send a message to the current session, creating a session if necessary
+  const handleSendMessage = async (message) => {
+    try {
+      setLoading(true);
+      let sessionId = currentSession ? currentSession.id : null;
 
-    const toggleTheme = () => {
-        const newColor = backgroundColor === '#ffffff' ? '#f0f0f0' : '#ffffff';
-        setBackgroundColor(newColor);
-    };
+      if (!sessionId) {
+        const response = await createChatSession();
+        setCurrentSession(response.data);
+        setSessions((prevSessions) => [...prevSessions, response.data]);
+        sessionId = response.data.id;
+      }
 
-    const handleSettingsClick = () => {
-        setShowSettings(true);
-    };
+      const response = await sendMessage(sessionId, message);
+      return response.data;
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleCloseSettings = () => {
-        setShowSettings(false);
-    };
+  // Delete a chat session
+  const handleDeleteSession = async (sessionId) => {
+    try {
+      setLoading(true);
+      await deleteChatSession(sessionId);
+      fetchSessions(); // Refresh sessions after deletion
+      if (currentSession && currentSession.id === sessionId) {
+        setCurrentSession(null);
+      }
+    } catch (error) {
+      console.error('Error deleting session:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleNewChatClick = () => {
-        setRefreshKey(prevKey => prevKey + 1);
-    };
+  const handleSignIn = () => {
+    setSignedIn(true);
+  };
 
-    return (
-        <div className="app-container" style={{ backgroundColor }}>
-            {showSettings ? (
-                <Settings onClose={handleCloseSettings} />
-            ) : (
-                isSignedIn ? (
-                    <SignIn />
-                ) : (
-                    <>
-                        <Sidebar
-                            backgroundColor={backgroundColor}
-                            onSettingsClick={handleSettingsClick}
-                            onNewChatClick={handleNewChatClick}
-                            messages={messages}  // Pass messages state to Sidebar
-                            clearChats={deleteAllChats}
-                        />
-                        <MainContent
-                            key={refreshKey}
-                            onSignIn={handleSignIn}
-                            onThemeToggle={toggleTheme}
-                            onNewMessage={createMessage}
-                            messages={messages}  // Pass messages state to MainContent
-                            setMessages={setMessages}  // Pass setMessages to MainContent if needed
-                        />
-                    </>
-                )
-            )}
-        </div>
-    );
+  const toggleTheme = () => {
+    const newColor = backgroundColor === '#ffffff' ? '#f0f0f0' : '#ffffff';
+    setBackgroundColor(newColor);
+  };
+
+  const handleSettingsClick = () => {
+    setShowSettings(true);
+  };
+
+  const handleCloseSettings = () => {
+    setShowSettings(false);
+  };
+
+  const handleNewChatClick = () => {
+    // Increment the refresh key to force MainContent to remount
+    setRefreshKey((prevKey) => prevKey + 1);
+  };
+
+  return (
+    <div className="app-container" style={{ backgroundColor }}>
+      {showSettings ? (
+        <Settings onClose={handleCloseSettings} />
+      ) : (
+        isSignedIn ? (
+          <SignIn />
+        ) : (
+          <>
+            <Sidebar
+              backgroundColor={backgroundColor}
+              onSettingsClick={handleSettingsClick}
+              onNewChatClick={handleNewChatClick}
+              sessions={sessions} // Pass sessions to Sidebar
+              onDeleteSession={handleDeleteSession} // Pass delete function to Sidebar
+            />
+            <MainContent
+              key={refreshKey}
+              onSignIn={handleSignIn}
+              onThemeToggle={toggleTheme}
+              handleSendMessage={handleSendMessage}
+            />
+          </>
+        )
+      )}
+    </div>
+  );
 }
 
-export default Home;
+export default App;

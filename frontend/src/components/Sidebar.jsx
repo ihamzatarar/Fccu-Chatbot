@@ -1,21 +1,21 @@
 import React from 'react';
 import './Styles/Sidebar.css';
 
-const Sidebar = ({ backgroundColor, onSettingsClick, onNewChatClick, messages, clearChats }) => {
-  const handleClearChats = () => {
-    clearChats();
-  };
+const Sidebar = ({ backgroundColor, onSettingsClick, onNewChatClick, sessions, onDeleteSession }) => {
   return (
     <div className="sidebar" style={{ backgroundColor }}>
       <button className="new-chat-btn" onClick={onNewChatClick}>+ New chat</button>
       <div className="conversations">
         <h3>Your conversations</h3>
         <ul>
-          {messages.slice().reverse().map((message, index) => (
-            <li key={index}>{message.title}</li>
+          {sessions.map((session) => (
+            <li key={session.id}>
+              {session.name || `Session ${session.id}`}
+              <button onClick={() => onDeleteSession(session.id)}>Delete</button>
+            </li>
           ))}
-        </ul> 
-        <button className="clear-btn" onClick={handleClearChats}>Clear All</button>
+        </ul>
+        <button className="clear-btn">Clear All</button>
       </div>
       <div className="settings">
         <ul>

@@ -10,3 +10,15 @@ psycopg2-binary
 python-dotenv~=1.0.1
 google-generativeai
 PyPDF2
+
+[
+
+  {"useer":"hello"
+    "bot" :"response"}
+  },
+
+]
+[
+{"useer":"hello"
+    "bot" :"response"}
+  }

@@ -1,0 +1,11 @@
+#root {
+  max-width: 1280px;
+  
+}
+.app-container {
+  display: flex;
+  height: 100vh;
+  background-color: #f8f9fc;
+  font-family: Arial, sans-serif;
+}
+

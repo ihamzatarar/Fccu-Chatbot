@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Chat
+from .models import Chat, ChatMessage, ChatSession
 
 
 
@@ -21,3 +21,16 @@ class ChatSerializer(serializers.ModelSerializer):
         model = Chat
         fields = ["id", "title", "content", "created_at", "author"]
         extra_kwargs = {"author": {"read_only": True}}
+
+
+class ChatSessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChatSession
+        fields = ['id', 'user', 'created_at']
+        extra_kwargs = {"user": {"read_only": True}}
+
+class ChatMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChatMessage
+        fields = ['id', 'session', 'role', 'message', 'timestamp']
+        read_only_fields = ['id', 'session', 'role', 'message', 'timestamp']
