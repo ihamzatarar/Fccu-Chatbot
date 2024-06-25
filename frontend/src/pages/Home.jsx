@@ -1,83 +1,105 @@
 import { useState, useEffect } from "react";
 import api from "../api";
-import Note from "../components/Note"
-import "../styles/Home.css"
+import Sidebar from '../components/Sidebar';
+import MainContent from '../components/MainContent';
+import Settings from '../components/Settings';
+import "../styles/Home.css";
 
 function Home() {
-    const [notes, setNotes] = useState([]);
-    const [content, setContent] = useState("");
-    const [title, setTitle] = useState("");
+    const [isSignedIn, setSignedIn] = useState(false);
+    const [backgroundColor, setBackgroundColor] = useState('#ffffff');
+    const [showSettings, setShowSettings] = useState(false);
+    const [refreshKey, setRefreshKey] = useState(0);
+    const [messages, setMessages] = useState([]);
 
     useEffect(() => {
-        getNotes();
+        getMessage();
     }, []);
 
-    const getNotes = () => {
+    const getMessage = () => {
         api
             .get("/api/chat/")
             .then((res) => res.data)
             .then((data) => {
-                setNotes(data);
-                console.log(data);
+                setMessages(data);
             })
             .catch((err) => alert(err));
     };
 
-    const deleteNote = (id) => {
+    const deleteAllChats = () => {
         api
-            .delete(`/api/chat/delete/${id}/`)
+            .delete(`/api/chat/delete_all/`)
             .then((res) => {
-                if (res.status === 204) alert("Chat deleted!");
-                else alert("Failed to delete chat.");
-                getNotes();
+                if (res.status === 204) {
+                    getMessage(); // Refresh messages without alert
+                } else {
+                    alert("Failed to delete chats.");
+                }
             })
             .catch((error) => alert(error));
     };
 
-    const createNote = (e) => {
-        e.preventDefault();
+    const createMessage = (newMessage) => {
         api
-            .post("/api/chat/", { content, title })
+            .post("/api/chat/", newMessage)
             .then((res) => {
-                if (res.status === 201) alert("Chat created!");
-                else alert("Failed to make note.");
-                getNotes();
+                if (res.status === 201) {
+                    getMessage(); // Refresh messages without alert
+                } else {
+                    alert("Failed to create chat.");
+                }
             })
             .catch((err) => alert(err));
     };
 
+    const handleSignIn = () => {
+        setSignedIn(true);
+    };
+
+    const toggleTheme = () => {
+        const newColor = backgroundColor === '#ffffff' ? '#f0f0f0' : '#ffffff';
+        setBackgroundColor(newColor);
+    };
+
+    const handleSettingsClick = () => {
+        setShowSettings(true);
+    };
+
+    const handleCloseSettings = () => {
+        setShowSettings(false);
+    };
+
+    const handleNewChatClick = () => {
+        setRefreshKey(prevKey => prevKey + 1);
+    };
+
     return (
-        <div>
-            <div>
-                <h2>Notes</h2>
-                {notes.map((note) => (
-                    <Note note={note} onDelete={deleteNote} key={note.id} />
-                ))}
-            </div>
-            <h2>Create a Note</h2>
-            <form onSubmit={createNote}>
-                <label htmlFor="title">Title:</label>
-                <br />
-                <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    required
-                    onChange={(e) => setTitle(e.target.value)}
-                    value={title}
-                />
-                <label htmlFor="content">Content:</label>
-                <br />
-                <textarea
-                    id="content"
-                    name="content"
-                    required
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                ></textarea>
-                <br />
-                <input type="submit" value="Submit"></input>
-            </form>
+        <div className="app-container" style={{ backgroundColor }}>
+            {showSettings ? (
+                <Settings onClose={handleCloseSettings} />
+            ) : (
+                isSignedIn ? (
+                    <SignIn />
+                ) : (
+                    <>
+                        <Sidebar
+                            backgroundColor={backgroundColor}
+                            onSettingsClick={handleSettingsClick}
+                            onNewChatClick={handleNewChatClick}
+                            messages={messages}  // Pass messages state to Sidebar
+                            clearChats={deleteAllChats}
+                        />
+                        <MainContent
+                            key={refreshKey}
+                            onSignIn={handleSignIn}
+                            onThemeToggle={toggleTheme}
+                            onNewMessage={createMessage}
+                            messages={messages}  // Pass messages state to MainContent
+                            setMessages={setMessages}  // Pass setMessages to MainContent if needed
+                        />
+                    </>
+                )
+            )}
         </div>
     );
 }
