@@ -5,6 +5,7 @@
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
+  font-family: 'Open Sans', sans-serif;
 }
 
 header {
@@ -102,7 +103,8 @@ header {
   border-radius: 5px;
   cursor: pointer;
 }
-.status p{
+
+.status p {
   color: #343a40;
 }
 
@@ -140,21 +142,23 @@ main {
   padding: 20px;
   margin-bottom: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  overflow-y: auto; /* Add this line */
-  max-height: calc(100vh - 320px); /* Adjust the max-height as needed */
+  overflow-y: auto;
+  max-height: calc(100vh - 320px);
 }
 
 .chat-messages::-webkit-scrollbar {
   width: 8px;
- 
 }
+
 .chat-messages::-webkit-scrollbar-thumb {
   background-color: #5a67d8;
   border-radius: 10px;
 }
+
 .chat-messages::-webkit-scrollbar-thumb:hover {
   background-color: #434190;
 }
+
 .chat-messages::-webkit-scrollbar-track {
   background-color: #e2e8f0;
   border-radius: 10px;
@@ -188,22 +192,30 @@ main {
 }
 
 .message {
-  background-color: #f1f1f1;
-  color: #333;
-  padding: 10px;
+  display: flex;
   margin-bottom: 10px;
-  border-radius: 10px;
-  text-align: left;
+  max-width: 60%;
+  border-radius: 20px;
+  padding: 10px 15px;
+  word-wrap: break-word;
 }
 
 .message.user {
   background-color: #e1f5fe;
+  color: #333;
+  align-self: flex-end;
   text-align: right;
+  justify-content: flex-end;
+  margin-left: auto; /* Aligns the message to the right */
 }
 
 .message.bot {
   background-color: #f1f1f1;
+  color: #333;
+  align-self: flex-start;
   text-align: left;
+  justify-content: flex-start;
+  margin-right: auto; /* Aligns the message to the left */
 }
 
 .no-messages {
