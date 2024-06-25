@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Chat
-
+from .modules.chatbot_init import chatbot_instance
 
 class ChatListCreate(generics.ListCreateAPIView):
     serializer_class = ChatSerializer
@@ -44,7 +44,10 @@ class GetResponseView(APIView):
     def post(self, request, *args, **kwargs):
         message = request.data.get('message')
         if message:
-            response = get_chatbot_response(message)
+            response = (
+                chatbot_instance.send_message(message).text
+            )
+
             return Response({'response': response})
         return Response({'error': 'Message not provided'}, status=400)
 
