@@ -85,3 +85,15 @@
   background-color: #e2e8f0;
   border-radius: 10px;
 }
+
+.DeleteSession{
+  width: 30%;
+  padding: 5px;
+  border: none;
+  background-color: #e53e3e;
+  color: #fff;
+  border-radius: 20px;
+  cursor: pointer;
+  margin-top: 20px;
+  margin: 15px;
+}
