@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import './Styles/MainContent.css';
+import LoadingIndicator from "./LoadingIndicator.jsx";
 
 
 const PencilIcon = (
@@ -19,6 +20,7 @@ const MainContent = ({ onSignIn, handleSendMessage, profileImage, sessionMessage
   const [searchResults, setSearchResults] = useState([]);
   const [editingMessageId, setEditingMessageId] = useState(null); // corrected variable name
   const [editMessageText, setEditMessageText] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (sessionMessages) {
@@ -46,18 +48,21 @@ const MainContent = ({ onSignIn, handleSendMessage, profileImage, sessionMessage
     setInputValue(e.target.value);
   };
 
-  const handleSubmit = async () => {
+ const handleSubmit = async () => {
     if (inputValue.trim() !== '') {
       const currentMessage = inputValue;
       setInputValue(''); // Clear the input field immediately
+      setLoading(true);
+      try {
+        const { user_message, bot_response } = await handleSendMessage(currentMessage);
+        const bot_message = bot_response.message;
 
-      const { user_message, bot_response } = await handleSendMessage(currentMessage);
-
-      const bot_message = bot_response.message;
-
-      const userMessage = { type: 'user', text: currentMessage };
-      const botResponse = { type: 'bot', text: bot_message };
-      setMessages([...messages, userMessage, botResponse]);
+        const userMessage = { type: 'user', text: currentMessage };
+        const botResponse = { type: 'bot', text: bot_message };
+        setMessages(prevMessages => [...prevMessages, userMessage, botResponse]);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -192,13 +197,14 @@ const MainContent = ({ onSignIn, handleSendMessage, profileImage, sessionMessage
       </main>
       <div className="chat-box">
         <input
-          type="text"
-          placeholder="Type your message here..."
-          value={inputValue}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyPress}
+            type="text"
+            placeholder="Type your message here..."
+            value={inputValue}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyPress}
         />
-        <button onClick={handleSubmit}>Submit</button>
+
+        <button onClick={handleSubmit}>{loading ? <LoadingIndicator/> : "Submit"}</button>
       </div>
     </div>
   );
