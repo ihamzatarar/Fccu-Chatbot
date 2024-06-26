@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 import Sidebar from '../components/Sidebar';
 import MainContent from '../components/MainContent';
 import SignIn from '../components/SignIn';
@@ -13,7 +14,7 @@ function App() {
   const [refreshKey, setRefreshKey] = useState(0); // Key for refreshing MainContent
   const [profileImage, setProfileImage] = useState(localStorage.getItem('profileImage') || 'src/assets/profile.png'); // Load from local storage
 
-
+  const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
   const [currentSession, setCurrentSession] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -126,6 +127,7 @@ function App() {
 
   const handleSignIn = () => {
     setSignedIn(true);
+    navigate("/logout");
   };
 
   const toggleTheme = () => {

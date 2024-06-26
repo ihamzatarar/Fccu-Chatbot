@@ -47,9 +47,9 @@ const SignIn = () => {
       if (authState.method === "login") {
         localStorage.setItem(ACCESS_TOKEN, res.data.access);
         localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
-        navigate("/");
+        navigate("/home");
       } else {
-        navigate("/login");
+        navigate("/");
       }
     } catch (error) {
       console.error("Error occurred:", error);

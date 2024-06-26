@@ -128,11 +128,11 @@ const MainContent = ({ onSignIn, handleSendMessage, profileImage, sessionMessage
             {isProfileBoxVisible && (
               <div className="profile-box">
                 <div className="status">
-                  <span className={`status-indicator ${isActive ? 'active' : 'inactive'}`}></span>
-                  <p>Active</p>
-                  <span>{isActive ? 'Active' : 'Inactive'}</span>
+                  <span className={`status-indicator ${isActive ? ' active' : ' inactive'}`}></span>
+                  <p>Status:</p>
+                  <span>{isActive ? ' Active' : ' Inactive'}</span>
                 </div>
-                <button onClick={onSignIn}>Sign In</button>
+                <button onClick={onSignIn}>Log out</button>
               </div>
             )}
           </div>
