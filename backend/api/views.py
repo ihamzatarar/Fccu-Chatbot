@@ -1,5 +1,3 @@
-from django.shortcuts import render
-from django.contrib.auth.models import User
 from rest_framework import generics, status
 from django.shortcuts import get_object_or_404
 from .serializers import *
@@ -7,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Chat
-# from .modules.chatbot_init import chatbot_instance
+from .modules.chatbot_init import chatbot_instance
 
 class ChatListCreate(generics.ListCreateAPIView):
     serializer_class = ChatSerializer
@@ -68,7 +66,7 @@ class ChatMessageView(APIView):
         print("Sennnding message to chatbot")
 
         # Get the bot response from the chatbot
-        bot_response = "hello"#chatbot_instance.send_message(user_message).text # Assuming chatbot_instance has a method `chat` that takes a message and returns a response
+        bot_response = chatbot_instance.send_message(user_message).text # Assuming chatbot_instance has a method `chat` that takes a message and returns a response
 
         # Save the bot message
         bot_chat_message = ChatMessage.objects.create(session=session, role='bot', message=bot_response)

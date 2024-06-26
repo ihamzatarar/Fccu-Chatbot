@@ -163,7 +163,7 @@ const MainContent = ({ onSignIn, handleSendMessage, profileImage, sessionMessage
               messages.map((message, index) => (
                 <div key={index} className={`message ${message.type}`}>
                   <div className={`message-bubble ${message.type}`} id={`message-${message.id}`} contentEditable={editingMessageId === message.id}>
-                    {message.text}
+                     <ReactMarkdown>{message.text}</ReactMarkdown>
                   </div>
                   {message.type === 'user' && (
                     <div className="edit-buttons">
