@@ -1,3 +1,4 @@
+/* MainContent.css */
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap');
 
 .main-content {
@@ -48,7 +49,7 @@ header {
   color: #343a40;
 }
 
-.profile-icon {
+.profile-icon img{
   width: 40px;
   height: 40px;
   background-color: #5a67d8;
@@ -137,13 +138,12 @@ main {
 
 .chat-messages {
   flex: 1;
-  background-color: #fff;
-  border-radius: 10px;
+  background-color: transparent;
+  border-radius: 0;
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
-  max-height: calc(100vh - 320px);
+  max-height: calc(100vh - 220px);
 }
 
 .chat-messages::-webkit-scrollbar {
@@ -198,6 +198,7 @@ main {
   border-radius: 20px;
   padding: 10px 15px;
   word-wrap: break-word;
+  position: relative; 
 }
 
 .message.user {
@@ -218,7 +219,115 @@ main {
   margin-right: auto; /* Aligns the message to the left */
 }
 
+.message-bubble {
+  position: relative;
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 80%;
+  word-wrap: break-word;
+  position: relative; 
+}
+
+.message-bubble.user {
+  background-color: #e1f5fe;
+  color: #333;
+  align-self: flex-end;
+  text-align: right;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+.message-bubble.bot {
+  background-color: #f1f1f1;
+  color: #333;
+  align-self: flex-start;
+  text-align: left;
+  justify-content: flex-start;
+  margin-right: auto;
+}
+
+.message-bubble.user.editing {
+  background-color: #aed581;
+}
+
+.message-bubble.bot.editing {
+  background-color: #c5cae9;
+}
+
+.message-bubble-content {
+  display: flex;
+  align-items: center;
+}
+
+.message-bubble-content input {
+  flex: 1;
+  padding: 8px;
+  margin-right: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.message-bubble-content button {
+  padding: 8px 12px;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.message-bubble-content button.cancel {
+  background-color: #f44336;
+}
+
 .no-messages {
   color: #999;
   text-align: center;
+}
+.message-bubble.user {
+  position: relative;
+}
+.edit-buttons {
+  position: absolute;
+  bottom: 5px; /* Adjust as needed to align with the message bubble */
+  right: 5px; /* Adjust as needed to align with the message bubble */
+  display: flex;
+  z-index: 1; /* Ensure edit buttons are above message content */
+ padding-right: 510px;
+}
+
+.pencil-icon {
+  color: #333;
+  width: 16px; 
+  height: 16px; 
+}
+
+.edit-buttons button svg {
+  width: 16px; 
+  height: 16px; 
+}
+
+.edit-buttons button {
+  margin: 0 5px; /* Adjust spacing */
+  padding: 5px;
+  background-color: transparent;
+  color: #fff; /* Text color */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  
+}
+
+.edit-buttons button:hover {
+  background-color: rgba(255, 255, 255, 0.1); /* Example: light background color on hover */
+}
+
+
+.edit-buttons button.save {
+  background-color: #48bb78;
+  
+}
+
+.edit-buttons button.cancel {
+  background-color: #e53e3e;
 }

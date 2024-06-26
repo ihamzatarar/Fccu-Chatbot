@@ -11,6 +11,8 @@ function App() {
   const [backgroundColor, setBackgroundColor] = useState('#ffffff');
   const [showSettings, setShowSettings] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); // Key for refreshing MainContent
+  const [profileImage, setProfileImage] = useState(localStorage.getItem('profileImage') || 'src/assets/profile.png'); // Load from local storage
+
 
   const [sessions, setSessions] = useState([]);
   const [currentSession, setCurrentSession] = useState(null);
@@ -154,7 +156,10 @@ function App() {
   return (
     <div className="app-container" style={{ backgroundColor }}>
       {showSettings ? (
-        <Settings onClose={handleCloseSettings} />
+        <Settings onClose={handleCloseSettings} 
+          profileImage={profileImage} 
+          setProfileImage={setProfileImage}
+        />
       ) : (
         isSignedIn ? (
           <SignIn />
@@ -171,8 +176,10 @@ function App() {
             <MainContent
               key={refreshKey}
               onSignIn={handleSignIn}
+              backgroundColor={backgroundColor} 
               onThemeToggle={toggleTheme}
               handleSendMessage={handleSendMessage}
+              profileImage={profileImage}
               sessionMessages={currentSession ? currentSession.messages : []} // Pass current session messages to MainContent
             />
           </>

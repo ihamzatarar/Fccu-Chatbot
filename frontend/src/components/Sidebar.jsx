@@ -11,7 +11,7 @@ const Sidebar = ({ backgroundColor, onSettingsClick, onNewChatClick, sessions, o
           {sessions.map((session) => (
             <li key={session.id} onClick={() => onSessionClick(session)}> {/* Updated here */}
               {session.name || `Session ${session.id}`}
-              <button onClick={(e) => { e.stopPropagation(); onDeleteSession(session.id); }}>Delete</button> {/* Prevent session click event from firing */}
+              <button className='DeleteSession' onClick={(e) => { e.stopPropagation(); onDeleteSession(session.id); }}>Delete</button> {/* Prevent session click event from firing */}
             </li>
           ))}
         </ul>
