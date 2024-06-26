@@ -123,12 +123,12 @@ const SignIn = () => {
             <div className="toggle-panel toggle-left">
               <h1>Welcome Back!</h1>
               <p>Enter your credentials to sign in</p>
-              <button className="hidden" onClick={toggleActive}>Sign Up</button>
+              <button className="hidden" onClick={toggleActive}>Sign In</button>
             </div>
             <div className="toggle-panel toggle-right">
               <h1>Hello, Friend!</h1>
               <p>Register with your personal details to use all site features</p>
-              <button className="hidden" onClick={toggleActive}>Sign In</button>
+              <button className="hidden" onClick={toggleActive}>Sign Up</button>
             </div>
           </div>
         </div>
