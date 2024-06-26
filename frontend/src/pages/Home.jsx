@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import MainContent from '../components/MainContent';
 import SignIn from '../components/SignIn';
@@ -17,10 +17,57 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   // Functions to interact with backend API
-  const createChatSession = () => api.post('/api/session/');
-  const sendMessage = (sessionId, message) => api.post(`/api/session/${sessionId}/message/`, { message });
-  const deleteChatSession = (sessionId) => api.delete(`/api/session/${sessionId}/`);
-  const listChatSessions = () => api.get('/api/session/');
+  const createChatSession = async () => {
+    try {
+      const response = await api.post('/api/session/');
+      return response.data.id;
+    } catch (error) {
+      console.error('Error creating session:', error);
+      return null;
+    }
+  };
+
+  const sendMessage = async (sessionId, message) => {
+    try {
+      const response = await api.post(`/api/session/${sessionId}/message/`, { message });
+      return response.data;
+    } catch (error) {
+      console.error('Error sending message:', error);
+      return null;
+    }
+  };
+
+  const deleteChatSession = async (sessionId) => {
+    try {
+      await api.delete(`/api/session/${sessionId}/`);
+      fetchSessions(); // Refresh sessions after deletion
+      if (currentSession && currentSession.id === sessionId) {
+        setCurrentSession(null);
+      }
+    } catch (error) {
+      console.error('Error deleting session:', error);
+    }
+  };
+
+  const listChatSessions = async () => {
+    try {
+      const response = await api.get('/api/session/');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching sessions:', error);
+      return [];
+    }
+  };
+
+  const getSessionMessages = async (sessionId) => {
+    try {
+      const response = await api.get(`/api/session/${sessionId}/messages/`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching session messages:', error);
+      return [];
+    }
+  };
 
   // Fetch sessions on component mount
   useEffect(() => {
@@ -30,8 +77,8 @@ function App() {
   // Fetch all chat sessions
   const fetchSessions = async () => {
     try {
-      const response = await listChatSessions();
-      setSessions(response.data);
+      const sessions = await listChatSessions();
+      setSessions(sessions);
     } catch (error) {
       console.error('Error fetching sessions:', error);
     }
@@ -44,14 +91,20 @@ function App() {
       let sessionId = currentSession ? currentSession.id : null;
 
       if (!sessionId) {
-        const response = await createChatSession();
-        setCurrentSession(response.data);
-        setSessions((prevSessions) => [...prevSessions, response.data]);
-        sessionId = response.data.id;
+        sessionId = await createChatSession();
+        if (!sessionId) {
+          throw new Error('Failed to create session');
+        }
+        setCurrentSession({ id: sessionId, messages: [] });
+        setSessions(prevSessions => [...prevSessions, { id: sessionId }]);
       }
 
       const response = await sendMessage(sessionId, message);
-      return response.data;
+      if (response) {
+        // Update session messages immediately after sending message
+        const messages = await getSessionMessages(sessionId);
+        setCurrentSession({ id: sessionId, messages });
+      }
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
@@ -59,19 +112,13 @@ function App() {
     }
   };
 
-  // Delete a chat session
-  const handleDeleteSession = async (sessionId) => {
+  // Handle session click to fetch and set messages
+  const handleSessionClick = async (session) => {
     try {
-      setLoading(true);
-      await deleteChatSession(sessionId);
-      fetchSessions(); // Refresh sessions after deletion
-      if (currentSession && currentSession.id === sessionId) {
-        setCurrentSession(null);
-      }
+      const messages = await getSessionMessages(session.id);
+      setCurrentSession({ id: session.id, messages });
     } catch (error) {
-      console.error('Error deleting session:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error fetching session messages:', error);
     }
   };
 
@@ -92,9 +139,16 @@ function App() {
     setShowSettings(false);
   };
 
-  const handleNewChatClick = () => {
-    // Increment the refresh key to force MainContent to remount
-    setRefreshKey((prevKey) => prevKey + 1);
+  const handleNewChatClick = async () => {
+    try {
+      const sessionId = await createChatSession();
+      if (sessionId) {
+        setCurrentSession({ id: sessionId, messages: [] });
+        setSessions(prevSessions => [...prevSessions, { id: sessionId }]);
+      }
+    } catch (error) {
+      console.error('Error starting new chat:', error);
+    }
   };
 
   return (
@@ -111,13 +165,15 @@ function App() {
               onSettingsClick={handleSettingsClick}
               onNewChatClick={handleNewChatClick}
               sessions={sessions} // Pass sessions to Sidebar
-              onDeleteSession={handleDeleteSession} // Pass delete function to Sidebar
+              onDeleteSession={deleteChatSession} // Pass delete function to Sidebar
+              onSessionClick={handleSessionClick} // Pass session click handler to Sidebar
             />
             <MainContent
               key={refreshKey}
               onSignIn={handleSignIn}
               onThemeToggle={toggleTheme}
               handleSendMessage={handleSendMessage}
+              sessionMessages={currentSession ? currentSession.messages : []} // Pass current session messages to MainContent
             />
           </>
         )

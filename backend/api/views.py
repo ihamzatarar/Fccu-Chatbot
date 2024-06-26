@@ -40,19 +40,6 @@ class CreateUserView(generics.CreateAPIView):
 
 
 
-class GetResponseView(APIView):
-    permission_classes = [AllowAny]
-    def post(self, request, *args, **kwargs):
-        message = request.data.get('message')
-        if message:
-            response = (
-                # chatbot_instance.send_message(message).text
-                print("Hello")
-            )
-
-            return Response({'response': response})
-        return Response({'error': 'Message not provided'}, status=400)
-
 
 class ChatSessionListCreate(generics.ListCreateAPIView):
     serializer_class = ChatSessionSerializer
@@ -81,7 +68,7 @@ class ChatMessageView(APIView):
         print("Sennnding message to chatbot")
 
         # Get the bot response from the chatbot
-        bot_response = chatbot_instance.send_message(user_message).text # Assuming chatbot_instance has a method `chat` that takes a message and returns a response
+        bot_response = "hello"#chatbot_instance.send_message(user_message).text # Assuming chatbot_instance has a method `chat` that takes a message and returns a response
 
         # Save the bot message
         bot_chat_message = ChatMessage.objects.create(session=session, role='bot', message=bot_response)
@@ -104,4 +91,12 @@ class ChatSessionDelete(generics.DestroyAPIView):
     def perform_destroy(self, instance):
         ChatMessage.objects.filter(session=instance).delete()
         instance.delete()
+
+class ChatSessionMessagesView(generics.ListAPIView):
+    serializer_class = ChatMessageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        session_id = self.kwargs['session_id']
+        return ChatMessage.objects.filter(session_id=session_id)
 
