@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
 import Sidebar from '../components/Sidebar';
 import MainContent from '../components/MainContent';
 import SignIn from '../components/SignIn';
@@ -13,13 +12,11 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); // Key for refreshing MainContent
   const [profileImage, setProfileImage] = useState(localStorage.getItem('profileImage') || 'src/assets/profile.png'); // Load from local storage
-
-  const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
   const [currentSession, setCurrentSession] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
-  // Functions to interact with backend API
   const createChatSession = async () => {
     try {
       const response = await api.post('/api/session/');
@@ -72,12 +69,10 @@ function App() {
     }
   };
 
-  // Fetch sessions on component mount
   useEffect(() => {
     fetchSessions();
   }, []);
 
-  // Fetch all chat sessions
   const fetchSessions = async () => {
     try {
       const sessions = await listChatSessions();
@@ -87,7 +82,6 @@ function App() {
     }
   };
 
-  // Send a message to the current session, creating a session if necessary
   const handleSendMessage = async (message) => {
     try {
       setLoading(true);
@@ -104,7 +98,6 @@ function App() {
 
       const response = await sendMessage(sessionId, message);
       if (response) {
-        // Update session messages immediately after sending message
         const messages = await getSessionMessages(sessionId);
         setCurrentSession({ id: sessionId, messages });
       }
@@ -115,7 +108,6 @@ function App() {
     }
   };
 
-  // Handle session click to fetch and set messages
   const handleSessionClick = async (session) => {
     try {
       const messages = await getSessionMessages(session.id);
@@ -127,7 +119,6 @@ function App() {
 
   const handleSignIn = () => {
     setSignedIn(true);
-    navigate("/logout");
   };
 
   const toggleTheme = () => {
@@ -155,39 +146,55 @@ function App() {
     }
   };
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!isSidebarOpen);
+  };
+
   return (
-    <div className="app-container" style={{ backgroundColor }}>
-      {showSettings ? (
-        <Settings onClose={handleCloseSettings} 
-          profileImage={profileImage} 
-          setProfileImage={setProfileImage}
-        />
-      ) : (
-        isSignedIn ? (
-          <SignIn />
+    <>
+      <div className="sidebar-toggle" onClick={toggleSidebar}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </div>
+      <div className="app-container" style={{ backgroundColor }}>
+        {showSettings ? (
+          <Settings onClose={handleCloseSettings} 
+            profileImage={profileImage} 
+            setProfileImage={setProfileImage}
+          />
         ) : (
-          <>
-            <Sidebar
-              backgroundColor={backgroundColor}
-              onSettingsClick={handleSettingsClick}
-              onNewChatClick={handleNewChatClick}
-              sessions={sessions} // Pass sessions to Sidebar
-              onDeleteSession={deleteChatSession} // Pass delete function to Sidebar
-              onSessionClick={handleSessionClick} // Pass session click handler to Sidebar
-            />
-            <MainContent
-              key={refreshKey}
-              onSignIn={handleSignIn}
-              backgroundColor={backgroundColor} 
-              onThemeToggle={toggleTheme}
-              handleSendMessage={handleSendMessage}
-              profileImage={profileImage}
-              sessionMessages={currentSession ? currentSession.messages : []} // Pass current session messages to MainContent
-            />
-          </>
-        )
-      )}
-    </div>
+          isSignedIn ? (
+            <SignIn />
+          ) : (
+            <>
+              <Sidebar
+                className="sidebar"
+                style={{ left: isSidebarOpen ? '0' : '100%' }}
+                backgroundColor={backgroundColor}
+                onSettingsClick={handleSettingsClick}
+                onNewChatClick={handleNewChatClick}
+                sessions={sessions}
+                onDeleteSession={deleteChatSession}
+                onSessionClick={handleSessionClick}
+              />
+              <MainContent
+                key={refreshKey}
+                onSignIn={handleSignIn}
+                backgroundColor={backgroundColor}
+                onThemeToggle={toggleTheme}
+                handleSendMessage={handleSendMessage}
+                profileImage={profileImage}
+                sessionMessages={currentSession ? currentSession.messages : []}
+              />
+            </>
+          )
+        )}
+      </div>
+    </>
   );
 }
 
